@@ -1,7 +1,8 @@
 import json
+import os
 from fastapi import APIRouter, UploadFile
 from fastapi.responses import JSONResponse
-from app.utils import save_uploaded_image, load_face_features
+from app.utils import save_uploaded_image
 import face_recognition
 
 
@@ -14,7 +15,8 @@ async def recognize_face(file: UploadFile):
         file_path = save_uploaded_image(file)
 
         # Load the registered face image
-        registered_face_path = "registered_faces\woman-6109643_1280.jpg"
+        # registered_face_path = "registered_faces/woman-6109643_1280.jpg"
+        registered_face_path = os.path.join("app", "registered_faces", f"{os.path.splitext(file.filename)[0]}.jpg")
         registered_face_image = face_recognition.load_image_file(registered_face_path)
 
         # Load the uploaded image

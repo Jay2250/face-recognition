@@ -5,7 +5,7 @@ import numpy as np
 
 
 def save_uploaded_image(file):
-    file_path = os.path.join("registered_faces", file.filename)
+    file_path = os.path.join("app", "registered_faces", file.filename)
     with open(file_path, "wb") as image_file:
         image_file.write(file.file.read())
     return file_path
@@ -22,7 +22,7 @@ def save_face_features(filename, face_features_list):
                 if isinstance(value, np.ndarray):
                     face_features[key] = value.tolist()
 
-        features_path = os.path.join("registered_faces", f"{os.path.splitext(filename)[0]}.json")
+        features_path = os.path.join("app", "registered_faces", f"{os.path.splitext(filename)[0]}.json")
         with open(features_path, "w") as features_file:
             json.dump(face_features_list, features_file)
     except Exception as e:

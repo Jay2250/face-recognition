@@ -15,13 +15,28 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
+
+# Create a non-privileged user that the app will run under.
+# See https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user
+ARG UID=10001
+RUN adduser \
+    --disabled-password \
+    --gecos "" \
+    --home "/" \
+    --shell "/sbin/nologin" \
+    --no-create-home \
+    --uid "${UID}" \
+    appuser
+
 RUN apt-get update && apt-get install -y git
 
-RUN pip install -U pip wheel cmake
 RUN apt-get install -y libgl1-mesa-glx
+
+RUN apt-get install -y libglib2.0-0
+
 RUN apt-get update && \
     apt-get install -y build-essential cmake && \
-        apt-get clean
+	apt-get clean
 
 # Clone and build dlib from source
 RUN git clone https://github.com/davisking/dlib.git /tmp/dlib && \
@@ -34,18 +49,6 @@ RUN git clone https://github.com/davisking/dlib.git /tmp/dlib && \
 RUN cd /tmp/dlib && \
 	python setup.py install && \
 	rm -rf /tmp/dlib
-
-# Create a non-privileged user that the app will run under.
-# See https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user
-ARG UID=10001
-RUN adduser \
-    --disabled-password \
-    --gecos "" \
-    --home "/nonexistent" \
-    --shell "/sbin/nologin" \
-    --no-create-home \
-    --uid "${UID}" \
-    appuser
 
 # Download dependencies as a separate step to take advantage of Docker's caching.
 # Leverage a cache mount to /root/.cache/pip to speed up subsequent builds.
@@ -65,4 +68,4 @@ COPY . .
 EXPOSE 8000
 
 # Run the application.
-CMD uvicorn app.main:app
+CMD uvicorn app.main:app --reload
